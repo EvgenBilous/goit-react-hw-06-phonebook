@@ -1,16 +1,43 @@
+import { nanoid } from 'nanoid';
 import { React, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectContacts } from '../../redux/contacts/selectors';
+import { newContact } from '../../redux/contacts/slice';
 
-const PhoneBook = ({ onSubmit }) => {
+const PhoneBook = () => {
   const [state, setState] = useState({ name: '', number: '' });
+
+  const contacts = useSelector(selectContacts);
+
+  const dispatch = useDispatch();
 
   const handleChangeInputsForm = event => {
     const { name, value } = event.target;
     setState({ ...state, [name]: value });
   };
 
+  const addContact = ({ name, number }) => {
+    //const idShortid = shortid.generate();
+    const isDuplicateContact = contacts.some(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+    if (isDuplicateContact) {
+      alert(`${name} is already in contacts `);
+      return;
+    }
+    const contact = {
+      id: nanoid(),
+      name,
+      number,
+    };
+    const action = newContact(contact);
+    dispatch(action);
+  };
+
   const handleSubmit = event => {
     event.preventDefault();
-    onSubmit(state);
+    addContact(state);
+
     setState({ name: '', number: '' });
   };
 
